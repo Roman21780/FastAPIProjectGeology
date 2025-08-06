@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Well
 from app.schemas import WellCreate, WellUpdate
@@ -15,10 +16,12 @@ def create_well(db: Session, well: WellCreate):
     db.refresh(db_well)
     return db_well
 
+
 def update_well(db: Session, well_id: int, well: WellUpdate):
     db_well = get_well(db, well_id)
     if not db_well:
-        return None
+        raise HTTPException(status_code=404, detail="Well not found")  # Добавлена проверка
+
     update_data = well.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_well, field, value)

@@ -29,8 +29,9 @@ docker-compose up -d --build
 
 # Применить миграции
 docker-compose exec web alembic upgrade head
+________________________________________________________
 
-Приложение будет доступно по адресу: http://localhost:8000
+### 3. Приложение будет доступно по адресу: http://localhost:8000
 
 ## Доступные эндпоинты
 
@@ -42,10 +43,15 @@ Redoc: http://localhost:8000/redoc
 
 docker-compose exec web pytest
 
+# Инициализация alembic
+alembic init alembic
+
 # Создать новую миграцию
+alembic revision --autogenerate -m "Добавлена таблица компаний"
 docker-compose exec web alembic revision --autogenerate -m "description"
 
 # Применить миграции
+alembic upgrade head
 docker-compose exec web alembic upgrade head
 
 # Остановка приложения

@@ -1,9 +1,15 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 
 
 class CompanyBase(BaseModel):
-    name: str = Field(..., max_length=100, unique=True)
+    name: str = Field(
+        ...,
+        max_length=100,
+        examples=["ООО Газпром"],
+        description="Название компании (уникальное)",
+        json_schema_extra={"unique": True}  # Примечание: уникальность должна проверяться на уровне БД
+    )
 
 
 class CompanyCreate(CompanyBase):
@@ -11,19 +17,37 @@ class CompanyCreate(CompanyBase):
 
 
 class CompanyUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=100)
+    name: Optional[str] = Field(
+        None,
+        max_length=100,
+        examples=["ООО Газпром Нефть"],
+        description="Новое название компании"
+    )
 
 
 class Company(CompanyBase):
-    id: int
+    id: int = Field(
+        ...,
+        examples=[1],
+        description="Уникальный идентификатор компании"
+    )
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class WellStatusBase(BaseModel):
-    name: str = Field(..., max_length=50)
-    description: Optional[str] = Field(None, max_length=255)
+    name: str = Field(
+        ...,
+        max_length=50,
+        examples=["В работе"],
+        description="Название статуса скважины (уникальное)"
+    )
+    description: Optional[str] = Field(
+        None,
+        max_length=255,
+        examples=["Скважина в эксплуатации"],
+        description="Дополнительное описание статуса"
+    )
 
 
 class WellStatusCreate(WellStatusBase):
@@ -31,12 +55,25 @@ class WellStatusCreate(WellStatusBase):
 
 
 class WellStatusUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=50)
-    description: Optional[str] = Field(None, max_length=255)
+    name: Optional[str] = Field(
+        None,
+        max_length=50,
+        examples=["Консервация"],
+        description="Новое название статуса скважины"
+    )
+    description: Optional[str] = Field(
+        None,
+        max_length=255,
+        examples=["Скважина на временной консервации"],
+        description="Новое описание статуса"
+    )
 
 
 class WellStatus(WellStatusBase):
-    id: int
+    id: int = Field(
+        ...,
+        examples=[1],
+        description="Уникальный идентификатор статуса"
+    )
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

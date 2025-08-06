@@ -1,29 +1,28 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session  # Явно импортируем Session
+from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+# Преобразуем URL в строку, если это необходимо
+database_url = str(settings.DATABASE_URL)
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    pool_pre_ping=True,  # Проверка соединения перед использованием
-    pool_size=20,       # Размер пула соединений
-    max_overflow=100    # Максимальное количество соединений сверх pool_size
+    database_url,
+    pool_pre_ping=True,
+    pool_size=20,
+    max_overflow=100,
+    connect_args={
+        "connect_timeout": 5,
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+    }
 )
 
-# SessionLocal - фабрика для создания сессий БД
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-    class_=Session  # Явно указываем класс сессии
-)
-
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Генератор сессий для Dependency Injection
-def get_db() -> Session:  # Явно указываем тип возвращаемого значения
+def get_db():
     db = SessionLocal()
     try:
         yield db

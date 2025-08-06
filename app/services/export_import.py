@@ -4,12 +4,20 @@ from io import BytesIO, StringIO
 from typing import List, Dict
 import logging
 
+from app.core.config import settings
+
 logger = logging.getLogger(__name__)
 
 
 def export_data(data: List[Dict], entity_name: str, format: str = "csv"):
+
     try:
         df = pd.DataFrame(data)
+        if len(data) > settings.MAX_EXPORT_ROWS:
+            raise ValueError(f"Превышено максимальное количество строк для экспорта: {settings.MAX_EXPORT_ROWS}")
+
+        if format not in settings.EXPORT_FORMATS:
+            raise ValueError(f"Неподдерживаемый формат экспорта. Доступные: {settings.EXPORT_FORMATS}")
 
         if format == "csv":
             output = StringIO()
@@ -37,7 +45,7 @@ def export_data(data: List[Dict], entity_name: str, format: str = "csv"):
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 
-def import_data(file, db: Session, model_type: str):
+def import_data(file, model_type: str):
     try:
         if file.filename.endswith('.csv'):
             df = pd.read_csv(file.file)

@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.models import Company, WellStatus
-from app.schemas import CompanyCreate, CompanyUpdate, WellStatusCreate, WellStatusUpdate
+from app.schemas import CompanyCreate, WellStatusCreate, WellStatusUpdate
 
 # Операции для компаний
 def get_company(db: Session, company_id: int):
