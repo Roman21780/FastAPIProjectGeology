@@ -1,0 +1,54 @@
+# Игнорируемые файлы и директории
+
+# Git
+.git/
+.gitignore
+
+# IDE и редакторы
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Виртуальные окружения
+venv/
+env/
+.venv/
+
+# Логи
+logs/
+*.log
+
+# Кеш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Тестовые данные и временные файлы
+tests/
+tmp/
+*.tmp
+*.bak
+
+# Конфигурационные файлы (кроме .env)
+*.ini
+*.cfg
+!alembic.ini
+
+# Документация
+docs/
+*.md
+!README.md
+
+# Миграции (если нужно пересоздавать)
+# app/migrations/versions/
+
+# Docker-файлы (чтобы избежать рекурсии)
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# Артефакты сборки
+dist/
+build/
+*.egg-info/
