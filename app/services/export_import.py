@@ -1,48 +1,50 @@
+import os
+import tempfile
+
 import pandas as pd
 from fastapi import HTTPException
 from io import BytesIO, StringIO
 from typing import List, Dict
 import logging
 
+from starlette.responses import FileResponse, StreamingResponse
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 
-def export_data(data: List[Dict], entity_name: str, format: str = "csv"):
-
+def export_data(data: list[dict], entity_name: str, format: str = "csv"):
+    """Export data to CSV or Excel format in memory without temp files"""
     try:
         df = pd.DataFrame(data)
-        if len(data) > settings.MAX_EXPORT_ROWS:
-            raise ValueError(f"Превышено максимальное количество строк для экспорта: {settings.MAX_EXPORT_ROWS}")
 
-        if format not in settings.EXPORT_FORMATS:
-            raise ValueError(f"Неподдерживаемый формат экспорта. Доступные: {settings.EXPORT_FORMATS}")
+        output = BytesIO()
 
         if format == "csv":
-            output = StringIO()
+            content_type = "text/csv"
             df.to_csv(output, index=False)
-            content = output.getvalue()
-            media_type = "text/csv"
-            filename = f"{entity_name}.csv"
+            file_suffix = "csv"
         elif format == "xlsx":
-            output = BytesIO()
+            content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False)
-            content = output.getvalue()
-            media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            filename = f"{entity_name}.xlsx"
+            file_suffix = "xlsx"
         else:
-            raise ValueError("Unsupported export format")
+            raise ValueError(f"Unsupported format: {format}")
 
-        return {
-            "content": content,
-            "media_type": media_type,
-            "filename": filename
-        }
+        output.seek(0)
+
+        return StreamingResponse(
+            output,
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f"attachment; filename={entity_name}_export.{file_suffix}"
+            }
+        )
     except Exception as e:
-        logger.error(f"Export failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+        logger.error(f"Export failed: {str(e)}", exc_info=True)
+        raise
 
 
 def import_data(file, model_type: str):
