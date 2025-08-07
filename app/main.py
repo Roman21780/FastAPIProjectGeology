@@ -43,13 +43,13 @@ def create_app() -> FastAPI:
     return fastapi_app
 
 
-app_instance = create_app()
+app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "app.main:app_instance",
+        "app.main:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.DEBUG,
